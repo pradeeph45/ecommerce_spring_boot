@@ -1,5 +1,6 @@
 package com.ecommerce.ecommerce.controller;
 
+import com.ecommerce.ecommerce.config.AppConstants;
 import com.ecommerce.ecommerce.model.Product;
 import com.ecommerce.ecommerce.payload.ProductDTO;
 import com.ecommerce.ecommerce.payload.ProductResponse;
@@ -8,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,8 +29,13 @@ public class ProductController {
     }
 
     @GetMapping("/public/products")
-    public ResponseEntity<ProductResponse> getAllProducts(){
-        ProductResponse productDTOS = productService.getAllProducts();
+    public ResponseEntity<ProductResponse> getAllProducts(
+            @RequestParam(name = "pageNumber",defaultValue = AppConstants.PAGE_NUMBER) Integer pageNumber,
+            @RequestParam(name = "pageSize",defaultValue = AppConstants.PAGE_SIZE) Integer pageSize,
+            @RequestParam(name = "sortBy",defaultValue = AppConstants.SORT_PRODUCTS_BY) String sortBy,
+            @RequestParam(name = "sortOrder",defaultValue = AppConstants.SORT_ORDER) String sortOrder
+    ){
+        ProductResponse productDTOS = productService.getAllProducts(pageNumber,pageSize,sortBy,sortOrder);
         return new ResponseEntity<>(productDTOS,HttpStatus.OK);
     }
 
@@ -54,4 +62,12 @@ public class ProductController {
         ProductDTO deletedProductDTO = productService.deleteProduct(productId);
         return new ResponseEntity<>(deletedProductDTO,HttpStatus.OK);
     }
+
+    @PutMapping("/products/{productId}/image")
+    public ResponseEntity<ProductDTO> updateProductImage(@PathVariable Long productId,
+                                                         @RequestParam("image")MultipartFile image) throws IOException {
+       ProductDTO updatedProduct = productService.updateProductImage(productId,image);
+       return new ResponseEntity<>(updatedProduct,HttpStatus.OK);
+    }
+
 }
